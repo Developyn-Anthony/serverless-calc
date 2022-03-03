@@ -1,0 +1,28 @@
+service: ant-serverless-app
+
+frameworkVersion: '3'
+
+custom:
+  secrets: ${file(secrets.json)} # reference the secrets.json file
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: production
+  region: eu-west-1
+  environment:
+    NODE_ENV: ${self:custom.secrets.NODE_ENV}
+
+functions:
+  app:
+    handler: app.server # reference the file and expected method
+    events: # events trigger lamda functions
+      - http: # this is an API Gateway HTTP event trigger
+          path: /
+          method: ANY
+          cors: true
+      - http: # all routes get proxied to the express server
+          path: /{proxy+}
+          method: ANY
+          cors: true
+
